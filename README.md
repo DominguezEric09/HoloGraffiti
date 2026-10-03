@@ -10,9 +10,9 @@ Strokes are generated as solid tube mesh geometry in real time and can be export
 in downstream workflows such as game engines and 3D modeling software.
 
 Project Structure:
-Assets/Scripts/DrawingManager.cs — Core drawing loop, hand tracking, pinch detection
-Assets/Scripts/TubeMeshGenerator.cs — Procedural tube mesh generation from stroke points
-Assets/Scripts/OBJExporter.cs — Exports all strokes as OBJ file to device storage
+Assets/Scripts/DrawingManager.cs -> Core drawing loop, hand tracking, pinch detection
+Assets/Scripts/TubeMeshGenerator.cs -> Procedural tube mesh generation from stroke points
+Assets/Scripts/OBJExporter.cs -> Exports all strokes as OBJ file to device storage
 
 How It Works
 MRTK3 reads fingertip position every frame using HandsAggregatorSubsystem
