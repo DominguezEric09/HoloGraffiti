@@ -20,10 +20,3 @@ Pinch is detected by measuring distance between index tip and thumb tip
 Stroke points are recorded and smoothed using adaptive Vector3.Lerp
 On release, TubeMeshGenerator builds a solid cylindrical tube mesh around the recorded points
 OBJExporter collects all tube meshes and writes them to a single OBJ file
-
-
-
-
-MRTK3 packages installed via Unity Package Manager
-Visual Studio 2022 with UWP and ARM64 build tools
-Microsoft HoloLens 2 or Meta Quest 3
