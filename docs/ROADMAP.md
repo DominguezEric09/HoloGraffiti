@@ -71,9 +71,8 @@ The rest of the proposal (research, user study, iterating on feedback) will be p
 - [ ] Add Git LFS and a `.gitattributes` for binary files (`.png`, `.psd`, `.fbx`, `.glb`, `.wav`, and so on).
 - [ ] Each teammate configures Unity Smart Merge (`UnityYAMLMerge`) in their git config.
 - [ ] Each teammate installs, via Unity Hub, the **exact** Unity 6 version we pick, with **Android Build Support** (OpenJDK, SDK & NDK).
-- [ ] Enable developer mode on both headsets and install **Meta Quest Developer Hub** on dev machines.
+- [ ] Enable developer mode on headset and install **Meta Quest Developer Hub** on dev machines.
 - [ ] Create the headset sign-up sheet.
-- [ ] **Project lead:** find out exactly what the course expects in December (live demo, slides, written report, rubric).
 
 **Done when:** everyone has the tools installed and has deployed any sample app to a Quest 3S.
 
