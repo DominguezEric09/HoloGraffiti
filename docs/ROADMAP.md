@@ -46,11 +46,11 @@ The proposal is a guideline, not a contract. Scope can change as we learn what's
 
 | Role | Person | Responsibilities |
 |---|---|---|
-| Lead + Port | Ibrahim Khan | Quest port, Management, Comms, Deliverables, Code Review, Architecture |
-| Performance + Port | _TBD_ | Quest port, Benchmarking, Performance testing, Platform integration |
-| Geometry | _TBD_ | Mesh generation, Brushes, Shapes, Vertex colors |
-| Interactions | _TBD_ | Hand inputs, Motion, pinch drawing |
-| Exports | _TBD_ | OBJ/GLB/FBX export, Pipeline, Unity import checks, Menus |
+| Lead + Port | **Ibrahim** | Quest port, Management, Comms, Deliverables, Code Review, Architecture |
+| Performance + Port | **Nick** | Quest port, Benchmarking, Performance testing, Platform integration |
+| Geometry | **Nithin** | Mesh generation, Brushes, Shapes, Vertex colors |
+| Interactions | **Nathan** | Hand inputs, Motion, pinch drawing |
+| Exports | **Eddy** | OBJ/GLB/FBX export, Pipeline, Unity import checks, Menus |
 
 After the port, Lead and Performance help wherever work is stuck: Lead with features and integration, Performance with optimizations.
 
