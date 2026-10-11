@@ -78,21 +78,25 @@ The rest of the proposal (research, user study, iterating on feedback) will be p
 
 ### Phase 1: The port (Oct 19 – Nov 6)
 
-**Owner:** tech lead, on one branch (`quest-migration`). The Unity upgrade rewrites `ProjectSettings/`, scene files and many `.meta` files, so **nobody else edits the main Unity project until it's merged.**
+**Owner:** tech lead, on one branch (`quest-migration`). Switching to Android and installing the Meta SDK rewrite `ProjectSettings/` and add many files, so **nobody else edits the main Unity project until it's merged.**
 
-**Tech lead: migration steps**
-1. Branch from `hololens-v1`.
-2. Clean up the tutorial leftovers: `SampleScene.unity`, `firstunity.unity`, `duplicate1.cs`, the corgi PNG, `FollowCamera.cs` (unused) and `WSATestCertificate.pfx`. Set the product name, company name and Android package ID.
-3. Open the project in Unity 6 and let it upgrade.
-4. Remove MRTK3 and the Microsoft packages from `Packages/manifest.json` and delete `Packages/MixedReality/` (81 MB).
-5. Switch the build target to Android and remove the UWP ("Metro") XR settings.
-6. Install the Meta XR Core SDK and Interaction SDK on the Unity OpenXR Plugin. Follow Meta's [Unity project setup guide](https://developers.meta.com/horizon/documentation/unity/unity-project-setup/) and apply the Project Setup Tool's fixes.
-7. Switch to URP. Create one lightweight stroke material and assign it in the Inspector, replacing the `Shader.Find` calls.
-8. Remove the frame-rate cap and vSync code ([DrawingManager.cs#L57](Assets/Scripts/DrawingManager.cs#L57)). On Quest the headset controls frame timing.
-9. Rebuild `DrawingScene` around Meta's camera rig with hand tracking and passthrough.
-10. Stub out the drawing input so the project compiles (`DrawingManager` currently depends on MRTK). Phase 2 replaces the stub.
+The repo root is a fresh Unity 6.6 URP project. The old HoloLens project stays in `legacy/` for reference.
 
-**Everyone else works in a sandbox meanwhile.** Each person uses a throwaway Unity 6 project on their own machine and brings plain C# scripts into the main project after M0.
+**Tech lead: port steps**
+1. Branch from `phase-1-start`.
+2. Add the Unity license secrets and set the `UNITY_CI` repository variable to `true`, so CI tests and builds this branch.
+3. Set the product name, company name and Android package ID. Remove the template packages we don't use (`com.unity.collab-proxy`, `com.unity.visualscripting`).
+4. Switch the build target to Android. If you use Unity's Meta Quest build profile, set `buildProfile` in the CI build step to its asset path.
+5. Install the Meta XR Core SDK and Interaction SDK on the Unity OpenXR Plugin. Follow Meta's [Unity project setup guide](https://developers.meta.com/horizon/documentation/unity/unity-project-setup/) and apply the Project Setup Tool's fixes.
+6. Build `DrawingScene` in `Assets/HoloGraffiti/Scenes` around Meta's camera rig with hand tracking and passthrough.
+7. Copy `DrawingManager`, `TubeMeshGenerator` and `ObjExporter` from `legacy/Assets/Scripts/` into `Assets/HoloGraffiti/Scripts/Runtime`. Leave `FollowCamera.cs` (unused) and `duplicate1.cs` behind. Then:
+   - Stub out the drawing input so the project compiles (`DrawingManager` depends on MRTK). Phase 2 replaces the stub.
+   - Create one lightweight URP stroke material and assign it in the Inspector, replacing the `Shader.Find` calls.
+   - Remove the frame-rate cap and vSync code ([DrawingManager.cs#L57](../legacy/Assets/Scripts/DrawingManager.cs#L57)). On Quest the headset controls frame timing.
+
+   Track B's fixed `TubeMeshGenerator` and `ObjExporter` replace these copies in Phase 2.
+
+**Everyone else works in a sandbox meanwhile.** Each person uses a throwaway Unity `6000.6.5f1` project on their own machine and brings plain C# scripts into the main project after M0.
 - **Track A:** go through Meta's Interaction SDK samples and build a pinch-drawing prototype. Write the input interface (pinch state, pinch point, confidence) and an **editor version driven by mouse and keyboard**, so people can work without a headset.
 - **Track B:**
   - fix the OBJ exporter bugs (locale-dependent number format, mirrored output, no normals, always overwrites the same file)
@@ -101,7 +105,7 @@ The rest of the proposal (research, user study, iterating on feedback) will be p
   - add end caps
   - write edit-mode tests for mesh generation and export
 
-**Done when:** passthrough and hand tracking run on a Quest 3S, the APK builds from every team machine, and the branch is merged to `main`.
+**Done when:** passthrough and hand tracking run on a Quest 3S, the APK builds on every team machine and in CI, and the branch is merged to `main`.
 
 ### Phase 2: Drawing on Quest + export to Unity (Nov 9 – Dec 4)
 
