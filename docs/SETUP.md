@@ -41,7 +41,7 @@ Do this once on each machine you'll work on.
 
 ## 3. Code editor and formatter
 
-1. Use **VS Code** with the **Unity** extension, or **JetBrains Rider**. Select it in Unity under Settings → External Tools → External Script Editor.
+1. Use **VS Code** with the **Unity** extension. Select it in Unity under Settings → External Tools → External Script Editor.
 2. Install the **.NET SDK**, version 8 or newer (`brew install --cask dotnet-sdk` on macOS, or the installer from [dotnet.microsoft.com](https://dotnet.microsoft.com/download)).
 3. In the repo folder, install our code formatter, CSharpier, at the version the repo uses:
    ```bash
