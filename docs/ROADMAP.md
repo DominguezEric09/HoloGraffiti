@@ -29,7 +29,7 @@ The rest of the proposal (research, user study, iterating on feedback) will be p
 | Topic | Decision | Why |
 |---|---|---|
 | Target hardware | Quest 3S only (HoloLens support is dropped.) | HoloLens 2 is discontinued |
-| Engine | Unity 6 | The current Meta XR SDK (v203, June 2026) no longer supports Unity 2022.3. |
+| Engine | Unity 6.6 (`6000.6.5f1`) for fall, then Unity 6.7 LTS over winter break | The current Meta XR SDK (v203, June 2026) no longer supports Unity 2022.3. |
 | XR stack | Meta XR Core SDK + Meta XR Interaction SDK, running on the Unity OpenXR Plugin | This is Meta's recommended setup. The older Oculus XR Plugin is deprecated. Meta also recommends the Interaction SDK for hand input. |
 | MRTK3 | We want remove this it entirely | It's built around HoloLens, the versions here are pre release, and running it next to Meta's input stack can cause issues. |
 | Render pipeline | URP | This is what Meta's tooling assumes and recommends. It also keeps the application more performant. |
@@ -70,7 +70,7 @@ The rest of the proposal (research, user study, iterating on feedback) will be p
 - [ ] Tag the current commit `hololens-v1` and push the tag.
 - [ ] Add Git LFS and a `.gitattributes` for binary files (`.png`, `.psd`, `.fbx`, `.glb`, `.wav`, and so on).
 - [ ] Each teammate configures Unity Smart Merge (`UnityYAMLMerge`) in their git config.
-- [ ] Each teammate installs, via Unity Hub, the **exact** Unity 6 version we pick, with **Android Build Support** (OpenJDK, SDK & NDK).
+- [ ] Each teammate installs, via Unity Hub, the **exact** Unity version we use (`6000.6.5f1`), with **Android Build Support** (OpenJDK, SDK & NDK).
 - [ ] Enable developer mode on headset and install **Meta Quest Developer Hub** on dev machines.
 - [ ] Create the headset sign-up sheet.
 
