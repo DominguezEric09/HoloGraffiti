@@ -93,7 +93,7 @@ After the port, Lead and Performance help wherever work is stuck: Lead with feat
 
 - [x] Create a fresh Unity `6000.6.5f1` URP project at the repo root and move the HoloLens project to `legacy/`.
 - [x] Set up CI, Git LFS and Smart Merge rules (`.gitattributes`), assembly definitions and the CSharpier formatter.
-- [ ] Tag `6b02e1d` (the last commit with the HoloLens project at the root) as `hololens-v1`. Tag the finished setup as `phase-1-start`. Push both tags.
+- [ ] Tag `6b02e1d` (the last commit with the HoloLens project at the root) as `legacy`. Tag the finished setup as `phase-1-start`. Push both tags.
 - [ ] Protect `main` on GitHub: require pull requests and passing CI checks.
 - [ ] Create GitHub issues for each role's Phase 1 work.
 - [ ] Each teammate follows [SETUP.md](SETUP.md): Unity `6000.6.5f1` with Android Build Support, Git LFS, Smart Merge, the formatter, developer mode and Meta Quest Developer Hub.
