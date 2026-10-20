@@ -71,4 +71,4 @@ CI (`.github/workflows/CI.yml`) runs the `.meta` check and the formatting check 
 
 - Install the Meta XR SDKs from Meta's package registry, `https://npm.developer.oculus.com`. Add it as a scoped registry in `Packages/manifest.json` rather than using the Asset Store, so CI and teammates can download the packages without signing in. The packages are `com.meta.xr.sdk.core` and `com.meta.xr.sdk.interaction.ovr`. Version 207.0.1 was the latest on 2026-10-16; Core needs Unity 6000.0 or newer.
 - Open question: the Interaction SDK depends on `com.unity.textmeshpro` 3.0.6, which Unity 6 merged into `ugui`. Check how the Package Manager resolves it.
-- The port branch `quest-migration` starts from the tag `phase-1-start`. That tag didn't exist yet as of 2026-10-16.
+- The port branch `quest-migration` starts from the tag `phase-1-start`.
