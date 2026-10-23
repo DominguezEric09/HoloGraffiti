@@ -110,3 +110,5 @@ InitTestScene*.unity*
 /[Aa]ssets/[Ss]ceneDependencyCache*
 
 /[Aa]ssets/[Rr]esources/DevAgentSettings.asset*
+/RuntimeActionBindings.json
+/[Aa]ssets/StreamingAssets/RuntimeActionBindings.json*

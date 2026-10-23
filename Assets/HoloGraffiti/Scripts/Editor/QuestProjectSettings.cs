@@ -18,6 +18,7 @@ namespace HoloGraffiti.Editor
         const string OpenXRLoaderType = "UnityEngine.XR.OpenXR.OpenXRLoader";
         const string MetaXRFeatureSetId = "com.meta.openxr.featureset.metaxr";
         const string XRSettingsPath = "Assets/XR/XRGeneralSettingsPerBuildTarget.asset";
+        const string StrokeTag = "TubeStroke";
 
         [MenuItem("HoloGraffiti/Apply Quest Project Settings")]
         public static void Apply()
@@ -46,7 +47,28 @@ namespace HoloGraffiti.Editor
             EnableMetaOpenXR(BuildTargetGroup.Android);
             EnableMetaOpenXR(BuildTargetGroup.Standalone);
 
+            AddTag(StrokeTag);
+
             AssetDatabase.SaveAssets();
+        }
+
+        static void AddTag(string tag)
+        {
+            var tagManager = new SerializedObject(
+                AssetDatabase.LoadMainAssetAtPath("ProjectSettings/TagManager.asset")
+            );
+            var tags = tagManager.FindProperty("tags");
+            for (var i = 0; i < tags.arraySize; i++)
+            {
+                if (tags.GetArrayElementAtIndex(i).stringValue == tag)
+                {
+                    return;
+                }
+            }
+
+            tags.InsertArrayElementAtIndex(tags.arraySize);
+            tags.GetArrayElementAtIndex(tags.arraySize - 1).stringValue = tag;
+            tagManager.ApplyModifiedPropertiesWithoutUndo();
         }
 
         static void EnableMetaOpenXR(BuildTargetGroup group)

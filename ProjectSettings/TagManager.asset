@@ -31,6 +31,7 @@ TagManager:
   - SamplesInfoPanel
   - QDSUIToggleCheckboxRadio
   - QDSUIToggleThumbnail
+  - TubeStroke
   layers:
   - Default
   - TransparentFX
