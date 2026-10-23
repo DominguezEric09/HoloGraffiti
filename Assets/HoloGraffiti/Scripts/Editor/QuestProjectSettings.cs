@@ -43,22 +43,24 @@ namespace HoloGraffiti.Editor
             config.insightPassthroughSupport = OVRProjectConfig.FeatureSupport.Supported;
             OVRProjectConfig.CommitProjectConfig(config);
 
-            var manager = GetOrCreateManagerSettings(BuildTargetGroup.Android);
-            XRPackageMetadataStore.AssignLoader(
-                manager,
-                OpenXRLoaderType,
-                BuildTargetGroup.Android
-            );
-
-            var metaFeatureSet =
-                OpenXRFeatureSetManager.GetFeatureSetWithId(
-                    BuildTargetGroup.Android,
-                    MetaXRFeatureSetId
-                ) ?? throw new InvalidOperationException("Meta XR OpenXR feature set not found.");
-            metaFeatureSet.isEnabled = true;
-            OpenXRFeatureSetManager.SetFeaturesFromEnabledFeatureSets(BuildTargetGroup.Android);
+            EnableMetaOpenXR(BuildTargetGroup.Android);
+            EnableMetaOpenXR(BuildTargetGroup.Standalone);
 
             AssetDatabase.SaveAssets();
+        }
+
+        static void EnableMetaOpenXR(BuildTargetGroup group)
+        {
+            var manager = GetOrCreateManagerSettings(group);
+            XRPackageMetadataStore.AssignLoader(manager, OpenXRLoaderType, group);
+
+            var metaFeatureSet =
+                OpenXRFeatureSetManager.GetFeatureSetWithId(group, MetaXRFeatureSetId)
+                ?? throw new InvalidOperationException(
+                    $"Meta XR OpenXR feature set not found for {group}."
+                );
+            metaFeatureSet.isEnabled = true;
+            OpenXRFeatureSetManager.SetFeaturesFromEnabledFeatureSets(group);
         }
 
         static XRManagerSettings GetOrCreateManagerSettings(BuildTargetGroup group)
