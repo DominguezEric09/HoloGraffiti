@@ -8,12 +8,14 @@ namespace HoloGraffiti.Interactions
     {
         [Header("Hand Reference")]
         [Tooltip("Assign the OVRHand component (Left or Right hand) from your hand tracking rig.")]
-        [SerializeField] private MonoBehaviour targetHand;
+        [SerializeField]
+        private MonoBehaviour targetHand;
 
         [Header("Pinch Settings")]
         [Range(0.1f, 1.0f)]
         [Tooltip("Strength threshold required to trigger a pinch (0 to 1).")]
-        [SerializeField] private float pinchThreshold = 0.8f;
+        [SerializeField]
+        private float pinchThreshold = 0.8f;
 
         // Public properties for state checking
         public bool IsPinched { get; private set; }

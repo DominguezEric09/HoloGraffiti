@@ -5,13 +5,21 @@ namespace HoloGraffiti.Interactions
     public class StrokeController : MonoBehaviour
     {
         [Header("Input Setup")]
-        [Tooltip("Attach any component implementing IDrawingInputProvider (e.g., MouseInputProvider or HandPinchInputProvider)")]
-        [SerializeField] private MonoBehaviour inputProviderComponent;
+        [Tooltip(
+            "Attach any component implementing IDrawingInputProvider (e.g., MouseInputProvider or HandPinchInputProvider)"
+        )]
+        [SerializeField]
+        private MonoBehaviour inputProviderComponent;
 
         [Header("Stroke Settings")]
-        [SerializeField] private float minDistanceBetweenPoints = 0.02f;
-        [SerializeField] private float strokeWidth = 0.04f;
-        [SerializeField] private Material defaultMaterial;
+        [SerializeField]
+        private float minDistanceBetweenPoints = 0.02f;
+
+        [SerializeField]
+        private float strokeWidth = 0.04f;
+
+        [SerializeField]
+        private Material defaultMaterial;
 
         private IDrawingInputProvider inputProvider;
         private LineRenderer currentLineRenderer;
@@ -26,13 +34,16 @@ namespace HoloGraffiti.Interactions
             }
             else
             {
-                Debug.LogError("[StrokeController] Assigned Input Provider does not implement IDrawingInputProvider!");
+                Debug.LogError(
+                    "[StrokeController] Assigned Input Provider does not implement IDrawingInputProvider!"
+                );
             }
         }
 
         private void Update()
         {
-            if (inputProvider == null) return;
+            if (inputProvider == null)
+                return;
 
             bool isDrawing = inputProvider.IsDrawing;
             Vector3 currentPos = inputProvider.GetDrawingWorldPosition();
@@ -78,7 +89,8 @@ namespace HoloGraffiti.Interactions
 
         private void UpdateCurrentStroke(Vector3 currentPos)
         {
-            if (currentLineRenderer == null) return;
+            if (currentLineRenderer == null)
+                return;
 
             if (Vector3.Distance(currentPos, lastPointPosition) >= minDistanceBetweenPoints)
             {

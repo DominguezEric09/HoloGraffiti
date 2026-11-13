@@ -1,7 +1,10 @@
 {
     "name": "HoloGraffiti.Runtime",
     "rootNamespace": "HoloGraffiti",
-    "references": [],
+    "references": [
+        "glTFast",
+        "glTFast.Export"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -1,12 +1,13 @@
-using UnityEngine;
 using HoloGraffiti.Interactions;
+using UnityEngine;
 
 namespace HoloGraffiti.Core
 {
     public class CursorFollower : MonoBehaviour
     {
         [Header("Input Reference")]
-        [SerializeField] private MonoBehaviour inputProviderComponent;
+        [SerializeField]
+        private MonoBehaviour inputProviderComponent;
 
         private IDrawingInputProvider inputProvider;
 
@@ -18,7 +19,9 @@ namespace HoloGraffiti.Core
             }
             else
             {
-                Debug.LogError("[CursorFollower] Assigned Input Provider does not implement IDrawingInputProvider!");
+                Debug.LogError(
+                    "[CursorFollower] Assigned Input Provider does not implement IDrawingInputProvider!"
+                );
             }
         }
 
@@ -29,7 +32,8 @@ namespace HoloGraffiti.Core
             //transform.position = inputProvider.GetDrawingWorldPosition();
             //Debug.Log($"Cursor target position: {inputProvider.GetDrawingWorldPosition()}");
 
-            if (inputProvider == null) return;
+            if (inputProvider == null)
+                return;
             Vector3 targetPos = inputProvider.GetDrawingWorldPosition();
             Debug.Log($"Applying position to cursor: {targetPos}");
             transform.position = targetPos;

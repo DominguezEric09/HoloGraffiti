@@ -1,8 +1,8 @@
-using UnityEngine;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using GLTFast;
 using GLTFast.Export;
+using UnityEngine;
 
 namespace HoloGraffiti
 {
@@ -16,7 +16,7 @@ namespace HoloGraffiti
         // scene by their "TubeStroke" tag and export them.
         // The underscore discards the Task return value because we are intentionally
         // fire-and-forget here - the headset UI does not need to await the result.
-        
+
         public void ExportAllStrokes()
         {
             GameObject[] strokes = GameObject.FindGameObjectsWithTag("TubeStroke");
@@ -34,9 +34,7 @@ namespace HoloGraffiti
         // Does the actual GLB export asynchronously using glTFast.
         // async/await is needed because glTFast's SaveToFileAndDispose is async -
         // it may need to wait for texture compression or other GPU work to finish.
-        private async System.Threading.Tasks.Task ExportAsync(
-            GameObject[] strokes
-        )
+        private async System.Threading.Tasks.Task ExportAsync(GameObject[] strokes)
         {
             if (strokes.Length == 0)
             {
@@ -50,17 +48,11 @@ namespace HoloGraffiti
                 CultureInfo.InvariantCulture
             );
             // persistentDataPath is the one folder Android always lets us write to.
-            string path = Path.Combine(
-                Application.persistentDataPath,
-                $"drawing_{timestamp}.glb"
-            );
+            string path = Path.Combine(Application.persistentDataPath, $"drawing_{timestamp}.glb");
 
             // GltfFormat.Binary produces a single .glb file (geometry + textures combined).
             // GltfFormat.Json would produce a .gltf + separate .bin + texture files instead.
-            var exportSettings = new ExportSettings
-            {
-                Format = GltfFormat.Binary,
-            };
+            var exportSettings = new ExportSettings { Format = GltfFormat.Binary };
 
             var export = new GameObjectExport(exportSettings);
 

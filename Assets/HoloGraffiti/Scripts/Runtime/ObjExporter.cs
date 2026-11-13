@@ -1,7 +1,7 @@
-using UnityEngine;
+using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Globalization;
+using UnityEngine;
 
 namespace HoloGraffiti
 {
@@ -34,13 +34,10 @@ namespace HoloGraffiti
                 CultureInfo.InvariantCulture
             );
             // persistentDataPath is the one folder Android always lets us write to.
-            string path = Path.Combine(
-                Application.persistentDataPath,
-                $"drawing_{timestamp}.obj"
-            );
+            string path = Path.Combine(Application.persistentDataPath, $"drawing_{timestamp}.obj");
 
             var sb = new StringBuilder();
-            
+
             // OBJ vertex indices start at 1, not 0.
             // vertexOffset tracks where the next object's vertices begin.
             int vertexOffset = 1;
@@ -50,7 +47,7 @@ namespace HoloGraffiti
                 MeshFilter meshFilter = obj.GetComponent<MeshFilter>();
 
                 // sharedMesh is the asset mesh (safe in both edit and play mode).
-                // mesh would create a copy at runtime and leak in edit mode tests. 
+                // mesh would create a copy at runtime and leak in edit mode tests.
                 if (meshFilter == null || meshFilter.sharedMesh == null)
                     continue;
 
@@ -87,7 +84,7 @@ namespace HoloGraffiti
                         )
                     );
                 }
-                
+
                 // Write each triangle face.
                 // Unity winding is clockwise; OBJ is counter-clockwise, so we swap b and c.
                 int[] triangles = mesh.triangles;

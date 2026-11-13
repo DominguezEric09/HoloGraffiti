@@ -1,17 +1,21 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-using System.Collections.Generic;
 
 namespace HoloGraffiti.Interactions
 {
     public class ControllerInputProvider : MonoBehaviour, IDrawingInputProvider
     {
         [Header("Controller Settings")]
-        [SerializeField] private XRNode controllerNode = XRNode.RightHand;
-        [SerializeField] private float triggerThreshold = 0.1f;
+        [SerializeField]
+        private XRNode controllerNode = XRNode.RightHand;
+
+        [SerializeField]
+        private float triggerThreshold = 0.1f;
 
         [Header("Position Offset")]
-        [SerializeField] private Vector3 localPositionOffset = new Vector3(0f, 0f, 0.05f);
+        [SerializeField]
+        private Vector3 localPositionOffset = new Vector3(0f, 0f, 0.05f);
 
         private InputDevice targetDevice;
 
