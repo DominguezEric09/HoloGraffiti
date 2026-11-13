@@ -42,9 +42,7 @@ namespace HoloGraffiti.Editor
                 );
             }
 
-            Debug.Log(
-                $"[QuestBuild] Built {summary.outputPath} ({summary.totalSize / (1024 * 1024)} MB)."
-            );
+            Debug.Log($"[QuestBuild] Built {summary.outputPath}.");
         }
     }
 }
