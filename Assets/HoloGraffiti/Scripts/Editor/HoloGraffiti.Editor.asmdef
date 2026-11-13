@@ -4,6 +4,7 @@
     "references": [
         "HoloGraffiti.Runtime",
         "Oculus.Interaction",
+        "Oculus.Interaction.OVR",
         "Oculus.VR",
         "Oculus.VR.Editor",
         "Unity.XR.Management",

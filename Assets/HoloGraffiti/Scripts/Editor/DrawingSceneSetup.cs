@@ -13,6 +13,7 @@ namespace HoloGraffiti.Editor
         const string MaterialPath = "Assets/HoloGraffiti/Materials/Stroke.mat";
         const string StrokeShader = "Universal Render Pipeline/Simple Lit";
         const string RootName = "HoloGraffiti";
+        const int MaxSourceChainLength = 8;
         const string RightControllerAnchorPath =
             "TrackingSpace/RightHandAnchor/RightControllerAnchor";
         const string LeftControllerAnchorPath = "TrackingSpace/LeftHandAnchor/LeftControllerAnchor";
@@ -74,8 +75,14 @@ namespace HoloGraffiti.Editor
             return material;
         }
 
+        // The rig holds several Hand components per side, chained together: each one
+        // reads from the one before it. We want the first Hand in the chain, the one
+        // closest to the tracking data (FromOVRHandDataSource).
         static Hand FindHand(Scene scene, Handedness handedness)
         {
+            Hand closest = null;
+            int closestDepth = int.MaxValue;
+
             foreach (GameObject sceneRoot in scene.GetRootGameObjects())
             {
                 foreach (Hand hand in sceneRoot.GetComponentsInChildren<Hand>(true))
@@ -85,27 +92,52 @@ namespace HoloGraffiti.Editor
                         continue;
                     }
 
-                    Object source = new SerializedObject(hand)
-                        .FindProperty("_iModifyDataFromSourceMono")
-                        ?.objectReferenceValue;
-                    if (source == null)
+                    int depth = DepthFromTrackingData(hand, handedness);
+                    if (depth > 0 && depth < closestDepth)
                     {
-                        continue;
-                    }
-
-                    SerializedProperty sourceHandedness = new SerializedObject(source).FindProperty(
-                        "_handedness"
-                    );
-                    if (sourceHandedness != null && sourceHandedness.intValue == (int)handedness)
-                    {
-                        return hand;
+                        closest = hand;
+                        closestDepth = depth;
                     }
                 }
             }
 
-            throw new System.InvalidOperationException(
-                $"No {handedness} Interaction SDK Hand found in {ScenePath}. Add the OVRComprehensiveInteractionRig first."
-            );
+            if (closest == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"No {handedness} Interaction SDK Hand found in {ScenePath}. Add the OVRComprehensiveInteractionRig first."
+                );
+            }
+
+            return closest;
+        }
+
+        // Counts the steps from a Hand back to the tracking data for the given side.
+        // Returns -1 if the chain ends anywhere else.
+        static int DepthFromTrackingData(Object modifier, Handedness handedness)
+        {
+            for (int depth = 1; depth <= MaxSourceChainLength; depth++)
+            {
+                Object source = new SerializedObject(modifier)
+                    .FindProperty("_iModifyDataFromSourceMono")
+                    ?.objectReferenceValue;
+
+                if (source is FromOVRHandDataSource)
+                {
+                    int sourceHandedness = new SerializedObject(source)
+                        .FindProperty("_handedness")
+                        .intValue;
+                    return sourceHandedness == (int)handedness ? depth : -1;
+                }
+
+                if (source == null)
+                {
+                    return -1;
+                }
+
+                modifier = source;
+            }
+
+            return -1;
         }
 
         static Transform FindCameraRig(Scene scene)

@@ -272,6 +272,16 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 482130, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
   m_PrefabInstance: {fileID: 87957187}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &95207814 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4484591312116288, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+  m_PrefabInstance: {fileID: 87957187}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &95207815 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4593680705043960, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+  m_PrefabInstance: {fileID: 87957187}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &279207001
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,6 +344,70 @@ Transform:
   m_Children: []
   m_Father: {fileID: 582032951}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &455212963
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 455212964}
+  - component: {fileID: 455212966}
+  - component: {fileID: 455212965}
+  m_Layer: 0
+  m_Name: LeftHandDrawing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &455212964
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455212963}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 740714918}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &455212965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455212963}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e97bafea96474229abffa4aaed455cc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.DrawingManager
+  inputProviderComponent: {fileID: 455212966}
+  minDistance: 0.01
+  strokeMaterial: {fileID: 2100000, guid: 5ab7adc32c1cd4326bc4866982259010, type: 2}
+--- !u!114 &455212966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455212963}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baf441bf28afe4108b1fb871186ca080, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.Interactions.PinchDetector
+  targetHand: {fileID: 1743393358}
+  pinchThreshold: 0.8
+  releaseThreshold: 0.5
+  trackingLossGrace: 0.2
 --- !u!1 &582032950
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,6 +472,170 @@ Transform:
   - {fileID: 1353019048}
   m_Father: {fileID: 87957194}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &740714917
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 740714918}
+  m_Layer: 0
+  m_Name: HoloGraffiti
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &740714918
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740714917}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 455212964}
+  - {fileID: 772264469}
+  - {fileID: 838074063}
+  - {fileID: 1378919936}
+  - {fileID: 2068433757}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &772264468
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 772264469}
+  - component: {fileID: 772264471}
+  - component: {fileID: 772264470}
+  m_Layer: 0
+  m_Name: RightHandDrawing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &772264469
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 772264468}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 740714918}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &772264470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 772264468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e97bafea96474229abffa4aaed455cc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.DrawingManager
+  inputProviderComponent: {fileID: 772264471}
+  minDistance: 0.01
+  strokeMaterial: {fileID: 2100000, guid: 5ab7adc32c1cd4326bc4866982259010, type: 2}
+--- !u!114 &772264471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 772264468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baf441bf28afe4108b1fb871186ca080, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.Interactions.PinchDetector
+  targetHand: {fileID: 1743393357}
+  pinchThreshold: 0.8
+  releaseThreshold: 0.5
+  trackingLossGrace: 0.2
+--- !u!1 &838074062
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 838074063}
+  - component: {fileID: 838074065}
+  - component: {fileID: 838074064}
+  m_Layer: 0
+  m_Name: LeftControllerDrawing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &838074063
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838074062}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 740714918}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &838074064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838074062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e97bafea96474229abffa4aaed455cc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.DrawingManager
+  inputProviderComponent: {fileID: 838074065}
+  minDistance: 0.01
+  strokeMaterial: {fileID: 2100000, guid: 5ab7adc32c1cd4326bc4866982259010, type: 2}
+--- !u!114 &838074065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838074062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2c913087753349549605f8a8c77bcd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.Interactions.ControllerInputProvider
+  controller: 1
+  triggerThreshold: 0.1
+  controllerAnchor: {fileID: 95207815}
+  localPositionOffset: {x: 0, y: 0, z: 0.05}
 --- !u!114 &959563486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -491,6 +729,70 @@ Transform:
   m_Children: []
   m_Father: {fileID: 630766199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1378919935
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1378919936}
+  - component: {fileID: 1378919938}
+  - component: {fileID: 1378919937}
+  m_Layer: 0
+  m_Name: RightControllerDrawing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1378919936
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378919935}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 740714918}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1378919937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378919935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e97bafea96474229abffa4aaed455cc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.DrawingManager
+  inputProviderComponent: {fileID: 1378919938}
+  minDistance: 0.01
+  strokeMaterial: {fileID: 2100000, guid: 5ab7adc32c1cd4326bc4866982259010, type: 2}
+--- !u!114 &1378919938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378919935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2c913087753349549605f8a8c77bcd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.Interactions.ControllerInputProvider
+  controller: 2
+  triggerThreshold: 0.1
+  controllerAnchor: {fileID: 95207814}
+  localPositionOffset: {x: 0, y: 0, z: 0.05}
 --- !u!1 &1503300753
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,6 +972,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4397664628265918113, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
   m_PrefabInstance: {fileID: 1743393355}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1743393357 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6221752895656363022, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+  m_PrefabInstance: {fileID: 1743393355}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a379f34d4f4f2e408d34f14bfb753ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1743393358 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5381322022706010847, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+  m_PrefabInstance: {fileID: 1743393355}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a379f34d4f4f2e408d34f14bfb753ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1743405147
 GameObject:
   m_ObjectHideFlags: 0
@@ -701,9 +1025,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 87957193}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2068433756
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2068433757}
+  - component: {fileID: 2068433759}
+  - component: {fileID: 2068433758}
+  m_Layer: 0
+  m_Name: Exporters
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2068433757
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068433756}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 740714918}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2068433758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068433756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f13f84f3962e46d6a9395236a8c91ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.GlbExporter
+--- !u!114 &2068433759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068433756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4684341c39a4361b3d7714a3ae4ce32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoloGraffiti.Runtime::HoloGraffiti.ObjExporter
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1503300755}
   - {fileID: 87957187}
+  - {fileID: 740714918}
