@@ -3,6 +3,7 @@
     "rootNamespace": "HoloGraffiti.Editor",
     "references": [
         "HoloGraffiti.Runtime",
+        "Oculus.Interaction",
         "Oculus.VR",
         "Oculus.VR.Editor",
         "Unity.XR.Management",
