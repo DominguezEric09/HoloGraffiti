@@ -1,116 +1,108 @@
-using System.Collections.Generic; // Gives us access to List<> (not directly used here but good practice)
-using System.IO; // Gives us File and Path — needed to write and save the OBJ file
-using System.Text; // Gives us StringBuilder — an efficient way to build large strings
-using UnityEngine; // Basic Unity functions — GameObject, MeshFilter, Debug, etc.
+using UnityEngine;
+using System.IO;
+using System.Text;
+using System.Globalization;
 
 namespace HoloGraffiti
 {
+    // Exports all tagged stroke GameObjects in the scene to a single OBJ file.
     public class ObjExporter : MonoBehaviour
     {
-        // EXPORT ALL STROKES
+        // Called at runtime (e.g. from a UI button) to gather all strokes in the
+        // scene by their "TubeStroke" tag and export them.
         public void ExportAllStrokes()
-        // This is the method that gets called when the Export button is pressed
-        // It finds all tube strokes in the scene and writes them to an OBJ file
         {
-            // StringBuilder is like a notepad we write the OBJ file into
-            // More efficient than using regular string concatenation for large files
-            StringBuilder sb = new StringBuilder();
-
-            // OBJ files number vertices starting at 1, not 0
-            // This offset tracks the running total of vertices across all strokes
-            // so each stroke's face indices are correct relative to the whole file
-            int vertexOffset = 1;
-
-            // FIND ALL TUBE STROKES IN THE SCENE
-            // FindGameObjectsWithTag searches the entire scene for objects
-            // tagged "TubeStroke" — the tag we assigned in TubeMeshGenerator
-            // Returns an array of all matching GameObjects
             GameObject[] strokes = GameObject.FindGameObjectsWithTag("TubeStroke");
+            ExportStrokes(strokes);
+        }
 
-            // If there are no strokes in the scene, nothing to export
-            // Log a message and exit early
+        /// Exports the given array of GameObjects to an OBJ file.
+        /// Separated from ExportAllStrokes so tests can pass strokes in directly
+        /// without needing the "TubeStroke" tag registered in the project.
+        public void ExportStrokes(GameObject[] strokes)
+        {
             if (strokes.Length == 0)
             {
                 Debug.Log("No strokes to export.");
                 return;
             }
 
-            // Write a comment at the top of the OBJ file
-            // Lines starting with # are comments in OBJ format — ignored by importers
-            sb.AppendLine("# Exported from HoloGraffiti");
+            // Build a timestamped filename so each export is unique.
+            // InvariantCulture ensures the date format is the same on every machine.
+            string timestamp = System.DateTime.Now.ToString(
+                "yyyy-MM-dd_HH-mm-ss",
+                CultureInfo.InvariantCulture
+            );
+            // persistentDataPath is the one folder Android always lets us write to.
+            string path = Path.Combine(
+                Application.persistentDataPath,
+                $"drawing_{timestamp}.obj"
+            );
 
-            // LOOP THROUGH EVERY STROKE
-            foreach (GameObject stroke in strokes)
-            // For each TubeStroke object found in the scene...
+            var sb = new StringBuilder();
+            
+            // OBJ vertex indices start at 1, not 0.
+            // vertexOffset tracks where the next object's vertices begin.
+            int vertexOffset = 1;
+
+            foreach (GameObject obj in strokes)
             {
-                // Get the MeshFilter component — this holds the geometry data
-                // (vertices, triangles) that TubeMeshGenerator created
-                MeshFilter mf = stroke.GetComponent<MeshFilter>();
+                MeshFilter meshFilter = obj.GetComponent<MeshFilter>();
 
-                // If this object somehow doesn't have a MeshFilter, skip it
-                if (mf == null)
+                // sharedMesh is the asset mesh (safe in both edit and play mode).
+                // mesh would create a copy at runtime and leak in edit mode tests. 
+                if (meshFilter == null || meshFilter.sharedMesh == null)
                     continue;
 
-                // Get the actual mesh data from the MeshFilter
-                Mesh mesh = mf.mesh;
+                Mesh mesh = meshFilter.sharedMesh;
+                Transform t = obj.transform;
 
-                // Get the array of vertex positions (x, y, z coordinates)
-                Vector3[] vertices = mesh.vertices;
-
-                // Get the array of triangle indices
-                // Every 3 numbers in this array = one triangle
-                // The numbers refer to positions in the vertices array
-                int[] triangles = mesh.triangles;
-
-                // Write the object name to the OBJ file
-                // "o" in OBJ format declares a new named object
-                sb.AppendLine($"o {stroke.name}");
-
-                // WRITE VERTICES
-                // "v" in OBJ format declares a vertex position
-                // Format: v x y z
-                foreach (Vector3 v in vertices)
+                // Write each vertex position in world space.
+                // Unity is left-handed (Z forward); OBJ is right-handed, so we negate Z.
+                foreach (Vector3 v in mesh.vertices)
                 {
-                    sb.AppendLine($"v {v.x} {v.y} {v.z}");
-                    // Each line writes one vertex's x, y, z position
-                    // These are in Unity's world space coordinates (meters)
+                    Vector3 world = t.TransformPoint(v);
+                    sb.AppendLine(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "v {0} {1} {2}",
+                            world.x,
+                            world.y,
+                            -world.z
+                        )
+                    );
                 }
 
-                // WRITE FACES
-                // "f" in OBJ format declares a face (triangle)
-                // Format: f index1 index2 index3
-                // Indices refer to the vertex positions we wrote above
-                for (int i = 0; i < triangles.Length; i += 3)
-                // Step by 3 because every 3 triangle indices = one triangle
+                // Write each vertex normal in world space (also negating Z).
+                foreach (Vector3 n in mesh.normals)
                 {
-                    // Add the vertexOffset so indices are correct
-                    // relative to ALL vertices in the file, not just this stroke
-                    // Example: if stroke 1 had 100 vertices, stroke 2's
-                    // vertices start at index 101, so we add 100 to all its face indices
+                    Vector3 worldNormal = t.TransformDirection(n);
+                    sb.AppendLine(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "vn {0} {1} {2}",
+                            worldNormal.x,
+                            worldNormal.y,
+                            -worldNormal.z
+                        )
+                    );
+                }
+                
+                // Write each triangle face.
+                // Unity winding is clockwise; OBJ is counter-clockwise, so we swap b and c.
+                int[] triangles = mesh.triangles;
+                for (int i = 0; i < triangles.Length; i += 3)
+                {
                     int a = triangles[i] + vertexOffset;
                     int b = triangles[i + 1] + vertexOffset;
                     int c = triangles[i + 2] + vertexOffset;
-                    sb.AppendLine($"f {a} {b} {c}");
+                    sb.AppendLine($"f {a}//{a} {c}//{c} {b}//{b}");
                 }
 
-                // After writing this stroke, advance the vertex offset
-                // by the number of vertices in this stroke
-                // so the next stroke's face indices start from the right number
-                vertexOffset += vertices.Length;
+                vertexOffset += mesh.vertices.Length;
             }
 
-            // SAVE THE FILE
-            // Application.persistentDataPath is a folder on the device
-            // that the app has permission to write to
-            // On Quest this is in the app's internal storage
-            // On PC (Unity editor) this is usually in AppData/LocalLow
-            string path = Path.Combine(Application.persistentDataPath, "drawing.obj");
-
-            // Write the entire StringBuilder contents to the file
-            // If the file already exists it gets overwritten
             File.WriteAllText(path, sb.ToString());
-
-            // Log the file path to the console so we know where it was saved
             Debug.Log($"OBJ exported to: {path}");
         }
     }
