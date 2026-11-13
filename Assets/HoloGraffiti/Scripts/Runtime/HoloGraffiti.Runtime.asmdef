@@ -3,7 +3,9 @@
     "rootNamespace": "HoloGraffiti",
     "references": [
         "glTFast",
-        "glTFast.Export"
+        "glTFast.Export",
+        "Oculus.Interaction",
+        "Oculus.VR"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

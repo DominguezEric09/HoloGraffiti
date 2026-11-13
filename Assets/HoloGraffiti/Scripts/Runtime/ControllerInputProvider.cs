@@ -1,37 +1,36 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 
 namespace HoloGraffiti.Interactions
 {
     public class ControllerInputProvider : MonoBehaviour, IDrawingInputProvider
     {
         [Header("Controller Settings")]
+        [Tooltip("Which Touch controller draws: RTouch (right) or LTouch (left).")]
         [SerializeField]
-        private XRNode controllerNode = XRNode.RightHand;
+        private OVRInput.Controller controller = OVRInput.Controller.RTouch;
 
+        [Range(0.0f, 1.0f)]
         [SerializeField]
         private float triggerThreshold = 0.1f;
 
+        [Tooltip(
+            "The camera rig's anchor for this controller (RightControllerAnchor or LeftControllerAnchor). The rig moves it every frame, so strokes line up with the controller you see."
+        )]
+        [SerializeField]
+        private Transform controllerAnchor;
+
         [Header("Position Offset")]
+        [Tooltip("Where the drawing point sits relative to the controller, in meters.")]
         [SerializeField]
         private Vector3 localPositionOffset = new Vector3(0f, 0f, 0.05f);
 
-        private InputDevice targetDevice;
-
-        private void Start()
+        private void Awake()
         {
-            InitializeDevice();
-        }
-
-        private void InitializeDevice()
-        {
-            List<InputDevice> devices = new List<InputDevice>();
-            InputDevices.GetDevicesAtXRNode(controllerNode, devices);
-
-            if (devices.Count > 0)
+            if (controllerAnchor == null)
             {
-                targetDevice = devices[0];
+                Debug.LogError(
+                    "[ControllerInputProvider] Assign the camera rig's controller anchor to Controller Anchor."
+                );
             }
         }
 
@@ -39,34 +38,26 @@ namespace HoloGraffiti.Interactions
         {
             get
             {
-                if (!targetDevice.isValid)
+                if (controllerAnchor == null || !OVRInput.IsControllerConnected(controller))
                 {
-                    InitializeDevice();
+                    return false;
                 }
 
-                if (targetDevice.TryGetFeatureValue(CommonUsages.trigger, out float triggerValue))
-                {
-                    return triggerValue >= triggerThreshold;
-                }
-
-                return false;
+                return OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller)
+                    >= triggerThreshold;
             }
         }
 
         public Vector3 GetDrawingWorldPosition()
         {
-            if (!targetDevice.isValid)
+            if (controllerAnchor == null)
             {
-                InitializeDevice();
+                return transform.position;
             }
 
-            if (targetDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 position))
-            {
-                Vector3 worldPos = transform.TransformPoint(position);
-                return worldPos + transform.TransformDirection(localPositionOffset);
-            }
-
-            return transform.position + transform.TransformDirection(localPositionOffset);
+            // TransformPoint applies the controller's rotation too, so the offset
+            // stays in front of the controller however it is held
+            return controllerAnchor.TransformPoint(localPositionOffset);
         }
     }
 }

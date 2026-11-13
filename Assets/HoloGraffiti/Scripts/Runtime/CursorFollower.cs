@@ -3,9 +3,14 @@ using UnityEngine;
 
 namespace HoloGraffiti.Core
 {
+    // Runs after the input providers have updated this frame
+    [DefaultExecutionOrder(100)]
     public class CursorFollower : MonoBehaviour
     {
         [Header("Input Reference")]
+        [Tooltip(
+            "Any component implementing IDrawingInputProvider (PinchDetector or ControllerInputProvider)"
+        )]
         [SerializeField]
         private MonoBehaviour inputProviderComponent;
 
@@ -27,16 +32,11 @@ namespace HoloGraffiti.Core
 
         private void Update()
         {
-            //if (inputProvider == null) return;
-            // Update cursor position continuously regardless of whether drawing is active
-            //transform.position = inputProvider.GetDrawingWorldPosition();
-            //Debug.Log($"Cursor target position: {inputProvider.GetDrawingWorldPosition()}");
-
             if (inputProvider == null)
                 return;
-            Vector3 targetPos = inputProvider.GetDrawingWorldPosition();
-            Debug.Log($"Applying position to cursor: {targetPos}");
-            transform.position = targetPos;
+
+            // Follow the drawing point continuously, whether or not a stroke is active
+            transform.position = inputProvider.GetDrawingWorldPosition();
         }
     }
 }

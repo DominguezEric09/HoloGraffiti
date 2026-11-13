@@ -1,25 +1,46 @@
 using System;
-using System.Reflection;
+using Oculus.Interaction;
+using Oculus.Interaction.Input;
 using UnityEngine;
 
 namespace HoloGraffiti.Interactions
 {
-    public class PinchDetector : MonoBehaviour
+    // Runs after the Interaction SDK has updated the hand this frame (order 0)
+    // and before DrawingManager reads it (order 100).
+    [DefaultExecutionOrder(50)]
+    public class PinchDetector : MonoBehaviour, IDrawingInputProvider
     {
         [Header("Hand Reference")]
-        [Tooltip("Assign the OVRHand component (Left or Right hand) from your hand tracking rig.")]
-        [SerializeField]
-        private MonoBehaviour targetHand;
+        [Tooltip(
+            "The Interaction SDK Hand to watch (left or right). It lives on the OVRHands object inside the interaction rig."
+        )]
+        [SerializeField, Interface(typeof(IHand))]
+        private UnityEngine.Object targetHand;
 
         [Header("Pinch Settings")]
         [Range(0.1f, 1.0f)]
-        [Tooltip("Strength threshold required to trigger a pinch (0 to 1).")]
+        [Tooltip("Pinch strength (0 to 1) needed to start a pinch.")]
         [SerializeField]
         private float pinchThreshold = 0.8f;
+
+        [Range(0.0f, 1.0f)]
+        [Tooltip(
+            "Pinch strength (0 to 1) below which a pinch ends. Keep it lower than the start threshold so a pinch doesn't flicker when the fingers hover near the cutoff."
+        )]
+        [SerializeField]
+        private float releaseThreshold = 0.5f;
+
+        [Tooltip(
+            "Seconds a pinch is kept alive after hand tracking drops out, so a brief glitch doesn't break a stroke."
+        )]
+        [SerializeField]
+        private float trackingLossGrace = 0.2f;
 
         // Public properties for state checking
         public bool IsPinched { get; private set; }
         public float CurrentPinchStrength { get; private set; }
+
+        // The point between the thumb tip and the index fingertip, in world space
         public Vector3 PinchPosition { get; private set; }
 
         // Events for other systems (drawing, UI, etc.) to subscribe to
@@ -27,39 +48,64 @@ namespace HoloGraffiti.Interactions
         public event Action OnPinchEnded;
         public event Action<float> OnPinchStayed; // Passes pinch strength
 
+        // IDrawingInputProvider, so a pinch can drive DrawingManager directly
+        public bool IsDrawing => IsPinched;
+
+        public Vector3 GetDrawingWorldPosition() => PinchPosition;
+
+        private IHand hand;
+        private float lastTrackedTime;
+
+        private void Awake()
+        {
+            hand = targetHand as IHand;
+            if (hand == null)
+            {
+                Debug.LogError("[PinchDetector] Assign an Interaction SDK Hand to Target Hand.");
+            }
+
+            PinchPosition = transform.position;
+        }
+
         private void Update()
         {
-            if (targetHand == null || !IsHandTracked())
+            if (hand == null)
             {
-                if (IsPinched)
-                {
-                    // Force release if hand is lost tracking
-                    IsPinched = false;
-                    CurrentPinchStrength = 0f;
-                    InvokePinchEnded();
-                }
                 return;
             }
 
-            // 1. Get pinch strength for the index finger (0 to 1)
-            CurrentPinchStrength = GetIndexPinchStrength();
+            if (!hand.IsTrackedDataValid)
+            {
+                HandleTrackingLost();
+                return;
+            }
 
-            // 2. Track index finger tip position in 3D world space (crucial for drawing!)
-            // Note: OVRHand provides joint positions; fallback to transform position if unavailable
-            PinchPosition = transform.position; // Default fallback
+            lastTrackedTime = Time.time;
+            CurrentPinchStrength = hand.GetFingerPinchStrength(HandFinger.Index);
 
-            // Update pinch state based on threshold
+            if (
+                hand.GetJointPose(HandJointId.HandThumbTip, out Pose thumbTip)
+                && hand.GetJointPose(HandJointId.HandIndexTip, out Pose indexTip)
+            )
+            {
+                PinchPosition = (thumbTip.position + indexTip.position) * 0.5f;
+            }
+
             bool wasPinched = IsPinched;
-            IsPinched = CurrentPinchStrength >= pinchThreshold;
+            IsPinched = NextPinchState(
+                wasPinched,
+                CurrentPinchStrength,
+                pinchThreshold,
+                releaseThreshold
+            );
 
-            // 3. Trigger events on state changes
             if (!wasPinched && IsPinched)
             {
-                InvokePinchStarted();
+                OnPinchStarted?.Invoke();
             }
             else if (wasPinched && !IsPinched)
             {
-                InvokePinchEnded();
+                OnPinchEnded?.Invoke();
             }
             else if (IsPinched)
             {
@@ -67,35 +113,46 @@ namespace HoloGraffiti.Interactions
             }
         }
 
-        private void InvokePinchStarted()
+        private void OnDisable()
         {
-            Debug.Log($"[PinchDetector] Hand: Pinch Started!");
-            OnPinchStarted?.Invoke();
+            EndPinch();
         }
 
-        private void InvokePinchEnded()
+        // Decides whether the hand counts as pinching this frame. Starting needs the
+        // strength to reach startThreshold; once pinching, it only ends when the
+        // strength falls below releaseThreshold. The gap between the two is what
+        // stops a pinch from flickering on and off.
+        public static bool NextPinchState(
+            bool wasPinched,
+            float strength,
+            float startThreshold,
+            float releaseThreshold
+        )
         {
-            Debug.Log($"[PinchDetector] Hand: Pinch Ended!");
-            OnPinchEnded?.Invoke();
+            // A release threshold above the start threshold would never let a pinch hold
+            releaseThreshold = Mathf.Min(releaseThreshold, startThreshold);
+            return wasPinched ? strength >= releaseThreshold : strength >= startThreshold;
         }
 
-        private bool IsHandTracked()
+        private void HandleTrackingLost()
         {
-            PropertyInfo trackedProperty = targetHand.GetType().GetProperty("IsTracked");
-            return trackedProperty != null && (bool)trackedProperty.GetValue(targetHand);
-        }
-
-        private float GetIndexPinchStrength()
-        {
-            MethodInfo pinchMethod = targetHand.GetType().GetMethod("GetFingerPinchStrength");
-            if (pinchMethod == null)
+            // Hold the pinch where it was for a moment, then let go
+            if (IsPinched && Time.time - lastTrackedTime > trackingLossGrace)
             {
-                return 0f;
+                EndPinch();
+            }
+        }
+
+        private void EndPinch()
+        {
+            CurrentPinchStrength = 0f;
+            if (!IsPinched)
+            {
+                return;
             }
 
-            Type fingerType = pinchMethod.GetParameters()[0].ParameterType;
-            object indexFinger = Enum.Parse(fingerType, "Index");
-            return (float)pinchMethod.Invoke(targetHand, new[] { indexFinger });
+            IsPinched = false;
+            OnPinchEnded?.Invoke();
         }
     }
 }

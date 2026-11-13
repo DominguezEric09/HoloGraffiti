@@ -1,10 +1,25 @@
 using System.Collections.Generic; // Gives us access to List<> for storing stroke points
+using HoloGraffiti.Interactions; // IDrawingInputProvider — where the pinch or trigger comes from
 using UnityEngine; // Basic Unity functions — Vector3, GameObject, MonoBehaviour, etc.
 
 namespace HoloGraffiti
 {
+    // Runs after the input providers have updated this frame,
+    // so a stroke follows the hand without a one-frame delay
+    [DefaultExecutionOrder(100)]
     public class DrawingManager : MonoBehaviour
     {
+        // INPUT
+        [Header("Input")]
+        [Tooltip(
+            "Any component implementing IDrawingInputProvider (PinchDetector or ControllerInputProvider)"
+        )]
+        [SerializeField]
+        private MonoBehaviour inputProviderComponent;
+
+        // Unity can't show an interface in the Inspector, so we take a component
+        // and check in Awake that it really is an input provider
+
         // SETTINGS
         [Header("Drawing Settings")]
         public float minDistance = 0.01f;
@@ -42,6 +57,28 @@ namespace HoloGraffiti
         // This is the real data — it survives after the LineRenderer is destroyed
         // and gets passed to TubeMeshGenerator to build the permanent tube
 
+        private IDrawingInputProvider inputProvider;
+
+        // The input source this manager draws from (one hand or one controller)
+
+        private Transform cameraTransform;
+
+        // The headset camera, looked up once and reused for the smoothing below
+
+        // AWAKE
+        void Awake()
+        // Runs once when the scene loads
+        {
+            inputProvider = inputProviderComponent as IDrawingInputProvider;
+            if (inputProvider == null)
+                Debug.LogError(
+                    "[DrawingManager] Assign a component that implements IDrawingInputProvider to Input Provider Component."
+                );
+
+            if (strokeMaterial == null)
+                Debug.LogError("[DrawingManager] Assign the stroke material.");
+        }
+
         // UPDATE
         void Update()
         // Runs every single frame
@@ -52,14 +89,30 @@ namespace HoloGraffiti
             }
         }
 
+        // ON DISABLE
+        void OnDisable()
+        // If this object is switched off mid-stroke, finish the stroke
+        // instead of leaving a preview line behind
+        {
+            if (isDrawing)
+                EndStroke();
+        }
+
         // GET DRAW INPUT
         bool TryGetDrawInput(out Vector3 tipPosition, out bool pinching)
-        // Stub until Phase 2 connects the Interactions input interface
-        // Always reports no hand, so nothing is drawn yet
+        // Asks the input provider where the drawing point is and whether
+        // the user is pinching (or holding the trigger) right now
         {
-            tipPosition = Vector3.zero;
-            pinching = false;
-            return false;
+            if (inputProvider == null)
+            {
+                tipPosition = Vector3.zero;
+                pinching = false;
+                return false;
+            }
+
+            pinching = inputProvider.IsDrawing;
+            tipPosition = inputProvider.GetDrawingWorldPosition();
+            return true;
         }
 
         // ── HANDLE DRAWING ──
@@ -135,10 +188,14 @@ namespace HoloGraffiti
                 // Adaptive smoothing based on distance from camera
                 // Close to camera = more smoothing (hand tracking is less accurate up close)
                 // Far from camera = less smoothing (more responsive)
-                float distanceFromCamera = Vector3.Distance(
-                    position,
-                    Camera.main.transform.position
-                );
+                if (cameraTransform == null && Camera.main != null)
+                    cameraTransform = Camera.main.transform;
+
+                // With no camera in the scene, fall back to the middle of the range
+                float distanceFromCamera =
+                    cameraTransform != null
+                        ? Vector3.Distance(position, cameraTransform.position)
+                        : 0.25f;
                 float smoothFactor = Mathf.Clamp(distanceFromCamera * 2f, 0.3f, 0.7f);
                 // Mathf.Clamp keeps the value between 0.3 and 0.7
 

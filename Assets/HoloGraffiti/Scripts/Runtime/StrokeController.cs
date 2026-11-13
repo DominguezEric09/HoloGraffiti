@@ -6,7 +6,7 @@ namespace HoloGraffiti.Interactions
     {
         [Header("Input Setup")]
         [Tooltip(
-            "Attach any component implementing IDrawingInputProvider (e.g., MouseInputProvider or HandPinchInputProvider)"
+            "Attach any component implementing IDrawingInputProvider (PinchDetector or ControllerInputProvider)"
         )]
         [SerializeField]
         private MonoBehaviour inputProviderComponent;
@@ -80,7 +80,9 @@ namespace HoloGraffiti.Interactions
 
             if (defaultMaterial != null)
             {
-                currentLineRenderer.material = defaultMaterial;
+                // sharedMaterial keeps every stroke on one material so they can be batched.
+                // .material would make a private copy for each stroke.
+                currentLineRenderer.sharedMaterial = defaultMaterial;
             }
 
             AddPointToStroke(startPos);
