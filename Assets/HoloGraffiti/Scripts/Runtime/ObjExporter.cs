@@ -16,27 +16,32 @@ namespace HoloGraffiti
             ExportStrokes(strokes);
         }
 
-        /// Exports the given array of GameObjects to an OBJ file.
+        /// Exports the given array of GameObjects to an OBJ file and returns the
+        /// file's path, or null if there was nothing to export.
         /// Separated from ExportAllStrokes so tests can pass strokes in directly
         /// without needing the "TubeStroke" tag registered in the project.
-        public void ExportStrokes(GameObject[] strokes)
+        /// directory is where the file goes; leave it out to use persistentDataPath,
+        /// the one folder Android always lets us write to.
+        public string ExportStrokes(GameObject[] strokes, string directory = null)
         {
-            if (strokes.Length == 0)
+            if (strokes == null || strokes.Length == 0)
             {
                 Debug.Log("No strokes to export.");
-                return;
+                return null;
             }
 
-            // Build a timestamped filename so each export is unique.
-            // InvariantCulture ensures the date format is the same on every machine.
-            string timestamp = System.DateTime.Now.ToString(
-                "yyyy-MM-dd_HH-mm-ss",
-                CultureInfo.InvariantCulture
-            );
-            // persistentDataPath is the one folder Android always lets us write to.
-            string path = Path.Combine(Application.persistentDataPath, $"drawing_{timestamp}.obj");
+            string path = ExportFile.NewPath(directory, "obj");
+            File.WriteAllText(path, BuildObj(strokes));
+            Debug.Log($"OBJ exported to: {path}");
+            return path;
+        }
 
+        /// Builds the text of an OBJ file from the given GameObjects.
+        /// Kept separate from the file writing so tests can check the text directly.
+        public static string BuildObj(GameObject[] strokes)
+        {
             var sb = new StringBuilder();
+            sb.AppendLine("# Exported from HoloGraffiti");
 
             // OBJ vertex indices start at 1, not 0.
             // vertexOffset tracks where the next object's vertices begin.
@@ -44,6 +49,9 @@ namespace HoloGraffiti
 
             foreach (GameObject obj in strokes)
             {
+                if (obj == null)
+                    continue;
+
                 MeshFilter meshFilter = obj.GetComponent<MeshFilter>();
 
                 // sharedMesh is the asset mesh (safe in both edit and play mode).
@@ -54,53 +62,76 @@ namespace HoloGraffiti
                 Mesh mesh = meshFilter.sharedMesh;
                 Transform t = obj.transform;
 
+                // Each of these properties copies the whole array every time it is
+                // read, so read each one once.
+                Vector3[] vertices = mesh.vertices;
+                Vector3[] normals = mesh.normals;
+                int[] triangles = mesh.triangles;
+
+                // A face can only point at normals if the mesh has one per vertex.
+                bool hasNormals = normals.Length == vertices.Length;
+
+                // "o" starts a new named object, so each stroke stays separate
+                // when the file is opened in Unity or Blender.
+                sb.Append("o ").AppendLine(obj.name);
+
                 // Write each vertex position in world space.
                 // Unity is left-handed (Z forward); OBJ is right-handed, so we negate Z.
-                foreach (Vector3 v in mesh.vertices)
+                foreach (Vector3 v in vertices)
                 {
                     Vector3 world = t.TransformPoint(v);
-                    sb.AppendLine(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "v {0} {1} {2}",
-                            world.x,
-                            world.y,
-                            -world.z
-                        )
-                    );
+                    AppendVector(sb, "v", world.x, world.y, -world.z);
                 }
 
                 // Write each vertex normal in world space (also negating Z).
-                foreach (Vector3 n in mesh.normals)
+                if (hasNormals)
                 {
-                    Vector3 worldNormal = t.TransformDirection(n);
-                    sb.AppendLine(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "vn {0} {1} {2}",
-                            worldNormal.x,
-                            worldNormal.y,
-                            -worldNormal.z
-                        )
-                    );
+                    foreach (Vector3 n in normals)
+                    {
+                        Vector3 worldNormal = t.TransformDirection(n);
+                        AppendVector(sb, "vn", worldNormal.x, worldNormal.y, -worldNormal.z);
+                    }
                 }
 
                 // Write each triangle face.
                 // Unity winding is clockwise; OBJ is counter-clockwise, so we swap b and c.
-                int[] triangles = mesh.triangles;
                 for (int i = 0; i < triangles.Length; i += 3)
                 {
                     int a = triangles[i] + vertexOffset;
                     int b = triangles[i + 1] + vertexOffset;
                     int c = triangles[i + 2] + vertexOffset;
-                    sb.AppendLine($"f {a}//{a} {c}//{c} {b}//{b}");
+                    if (hasNormals)
+                        sb.AppendLine($"f {a}//{a} {c}//{c} {b}//{b}");
+                    else
+                        sb.AppendLine($"f {a} {c} {b}");
                 }
 
-                vertexOffset += mesh.vertices.Length;
+                vertexOffset += vertices.Length;
             }
 
-            File.WriteAllText(path, sb.ToString());
-            Debug.Log($"OBJ exported to: {path}");
+            return sb.ToString();
+        }
+
+        // InvariantCulture always writes a decimal point. Without it, a device set
+        // to German or French would write "0,5" and break the file.
+        static void AppendVector(StringBuilder sb, string prefix, float x, float y, float z)
+        {
+            // Negating zero gives "negative zero", which some platforms print as "-0".
+            // -0 == 0 is true, so this swaps it for a plain 0.
+            if (x == 0f)
+                x = 0f;
+            if (y == 0f)
+                y = 0f;
+            if (z == 0f)
+                z = 0f;
+
+            sb.Append(prefix)
+                .Append(' ')
+                .Append(x.ToString(CultureInfo.InvariantCulture))
+                .Append(' ')
+                .Append(y.ToString(CultureInfo.InvariantCulture))
+                .Append(' ')
+                .AppendLine(z.ToString(CultureInfo.InvariantCulture));
         }
     }
 }
