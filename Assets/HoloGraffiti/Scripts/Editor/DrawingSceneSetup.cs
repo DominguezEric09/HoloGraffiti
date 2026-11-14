@@ -50,6 +50,8 @@ namespace HoloGraffiti.Editor
             GetOrAddComponent<ObjExporter>(exporters);
             GetOrAddComponent<GlbExporter>(exporters);
 
+            GetOrAddComponent<StrokeClearer>(GetOrCreateChild(root, "StrokeClearer"));
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
