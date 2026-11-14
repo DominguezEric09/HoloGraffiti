@@ -21,6 +21,14 @@ namespace HoloGraffiti
             if (points.Count < 2)
                 return null;
 
+            // Build the mesh first. A quick tap can leave every point within
+            // (radius * 2) of the first one, and then there is no tube to build.
+            // Stop here so we don't leave an invisible, empty stroke in the scene
+            // that the exporters would write out.
+            Mesh mesh = BuildTubeMesh(points, radius, sides);
+            if (mesh == null)
+                return null;
+
             // Create a new empty object in the scene to hold the tube
             GameObject tubeObject = new GameObject("TubeStroke");
 
@@ -36,12 +44,12 @@ namespace HoloGraffiti
             // Use the shared stroke material so all strokes can be batched together
             mr.sharedMaterial = material;
 
-            // Build the actual mesh geometry and assign it
-            Mesh mesh = BuildTubeMesh(points, radius, sides);
-            mf.mesh = mesh;
+            // Assign the mesh geometry we built above
+            mf.sharedMesh = mesh;
 
             // Debug log to confirm how many vertices were created
-            Debug.Log($"Tube created with {mesh.vertices.Length} vertices");
+            // (vertexCount doesn't copy the vertex array the way mesh.vertices does)
+            Debug.Log($"Tube created with {mesh.vertexCount} vertices");
 
             return tubeObject;
         }
@@ -61,8 +69,9 @@ namespace HoloGraffiti
             points = filtered;
 
             // After filtering we still need at least 2 points
+            // null tells CreateTube there is nothing to build
             if (points.Count < 2)
-                return new Mesh();
+                return null;
 
             Mesh mesh = new Mesh();
             List<Vector3> vertices = new List<Vector3>();
