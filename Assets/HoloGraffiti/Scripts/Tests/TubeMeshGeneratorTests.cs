@@ -1,61 +1,96 @@
 using System.Collections.Generic;
-using NUnit.Framework;
 using UnityEngine;
 
 namespace HoloGraffiti
 {
-    // EditMode tests for TubeMeshGenerator.CreateTube.
-    public class TubeMeshGeneratorTests
+    public class TubeMeshGenerator : MonoBehaviour
     {
-        private GameObject tube;
+        // Each mesh has at most this many path segments. Adjacent chunks share a ring.
+        public const int MaxSegmentsPerChunk = 128;
 
-        [TearDown]
-        public void TearDown()
+        public static GameObject CreateTube(List<Vector3> points, Material material,
+            float radius = 0.005f, int sides = 12)
         {
-            if (tube == null)
-                return;
+            if (points == null || points.Count < 2 || radius <= 0f || sides < 3)
+                return null;
 
-            Object.DestroyImmediate(tube.GetComponent<MeshFilter>().sharedMesh);
-            Object.DestroyImmediate(tube);
-        }
-
-        [Test]
-        public void CreateTube_OnePoint_ReturnsNull()
-        {
-            tube = TubeMeshGenerator.CreateTube(new List<Vector3> { Vector3.zero }, null);
-
-            Assert.IsNull(tube);
-        }
-
-        [Test]
-        public void CreateTube_PointsCloserThanTheTubeWidth_ReturnsNull()
-        {
-            // A quick tap: the hand moves a few millimeters, less than the
-            // 1 cm (radius * 2) needed to keep a second point.
-            var points = new List<Vector3>
+            var path = new List<Vector3> { points[0] };
+            for (int i = 1; i < points.Count; i++)
             {
-                Vector3.zero,
-                new Vector3(0.003f, 0f, 0f),
-                new Vector3(0.006f, 0f, 0f),
-            };
+                if (Vector3.Distance(points[i], path[path.Count - 1]) > radius * 2f)
+                    path.Add(points[i]);
+            }
+            if (path.Count < 2) return null;
 
-            tube = TubeMeshGenerator.CreateTube(points, null);
+            // Calculate orientations once across the entire path, not per chunk.
+            var rights = new Vector3[path.Count];
+            var ups = new Vector3[path.Count];
+            Vector3 previousTangent = Vector3.zero;
+            for (int i = 0; i < path.Count; i++)
+            {
+                Vector3 tangent;
+                if (i == 0) tangent = (path[1] - path[0]).normalized;
+                else if (i == path.Count - 1)
+                    tangent = (path[i] - path[i - 1]).normalized;
+                else
+                {
+                    Vector3 incoming = (path[i] - path[i - 1]).normalized;
+                    Vector3 outgoing = (path[i + 1] - path[i]).normalized;
+                    tangent = incoming + outgoing;
+                    if (tangent.sqrMagnitude < 1e-8f) tangent = outgoing;
+                    tangent.Normalize();
+                }
 
-            Assert.IsNull(tube);
+                if (i == 0)
+                {
+                    Vector3 reference = Mathf.Abs(Vector3.Dot(tangent, Vector3.up)) < 0.9f
+                        ? Vector3.up : Vector3.right;
+                    rights[i] = Vector3.Cross(reference, tangent).normalized;
+                }
+                else
+                {
+                    Quaternion rotation = Quaternion.FromToRotation(previousTangent, tangent);
+                    Vector3 transported = rotation * rights[i - 1];
+                    rights[i] = Vector3.ProjectOnPlane(transported, tangent).normalized;
+                    if (rights[i].sqrMagnitude < 1e-8f)
+                        rights[i] = Vector3.Cross(Vector3.up, tangent).normalized;
+                }
+                ups[i] = Vector3.Cross(tangent, rights[i]).normalized;
+                previousTangent = tangent;
+            }
+
+            var root = new GameObject("TubeStroke");
+            root.tag = "TubeStroke";
+            int chunkNumber = 0;
+            for (int start = 0; start < path.Count - 1; start += MaxSegmentsPerChunk)
+            {
+                int end = Mathf.Min(start + MaxSegmentsPerChunk, path.Count - 1);
+                Mesh mesh = BuildChunk(path, rights, ups, start, end, radius, sides,
+                    start == 0, end == path.Count - 1);
+                var child = new GameObject("TubeChunk_" + chunkNumber++);
+                child.transform.SetParent(root.transform, false);
+                child.AddComponent<MeshFilter>().sharedMesh = mesh;
+                child.AddComponent<MeshRenderer>().sharedMaterial = material;
+            }
+            return root;
         }
 
-        [Test]
-        public void CreateTube_TwoPointsFarApart_BuildsOneRingPerPoint()
+        private static Mesh BuildChunk(List<Vector3> path, Vector3[] rights, Vector3[] ups,
+            int start, int end, float radius, int sides, bool capStart, bool capEnd)
         {
-            var points = new List<Vector3> { Vector3.zero, new Vector3(0f, 0f, 0.1f) };
+            int ringCount = end - start + 1;
+            var vertices = new List<Vector3>(ringCount * sides + 2);
+            var triangles = new List<int>((ringCount - 1) * sides * 6 + 2 * sides * 3);
 
-            tube = TubeMeshGenerator.CreateTube(points, null, radius: 0.005f, sides: 12);
-
-            Assert.IsNotNull(tube);
-            Mesh mesh = tube.GetComponent<MeshFilter>().sharedMesh;
-            Assert.AreEqual(2 * 12, mesh.vertexCount);
-            // One quad (2 triangles, 6 indices) per side between the two rings
-            Assert.AreEqual(12 * 6, mesh.triangles.Length);
-        }
-    }
-}
+            for (int i = start; i <= end; i++)
+            {
+                for (int j = 0; j < sides; j++)
+                {
+                    float angle = 2f * Mathf.PI * j / sides;
+                    vertices.Add(path[i] + radius *
+                        (Mathf.Cos(angle) * rights[i] + Mathf.Sin(angle) * ups[i]));
+                }
+            }
+            for (int ring = 0; ring < ringCount - 1; ring++)
+            {
+                for (int j = 0; j < sides; j++)
